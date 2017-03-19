@@ -6,7 +6,7 @@ var service = function(config){
    
     this.getCurrentConditionsForLocation = function(locKey){
         var conditionsUrl = config.accuWeatherApiUrl + '/currentconditions/v1/' + locKey;
-        var searchPath = '?apikey=' + config.accuWeatherApiToken;
+        var searchPath = '?apikey=' + config.accuWeatherApiToken + "&details=true";
         var self = this;
 
         return new Promise((fulfill,reject)=>{
@@ -16,21 +16,27 @@ var service = function(config){
                 .then(function(response) { 
                     if (response.status != 200){
                         reject({errorCode: response.status, message:"Host error"});
-                        
                     }
-	                // Convert to JSON
-	                response.json()
-                        .then(d=>{
-                            //for now, just return the first result found.
-                            if (d.length > 0){
-                                fulfill(self.mapConditionsResult(d[0]));
-                            }
-                            else{
-                                reject({errorCode: 10, message: "Multiple results, result not accurate enough"});
-                            }
-                        })
-                    .catch(e=>reject(e));
+                    if(response.headers.get("content-type") && response.headers.get("content-type").toLowerCase().indexOf("application/json") >= 0){
+	                    // Json response received, convert to JSON object
+ 	                    return response.json();
+                    }
+                    else{
+                        reject({errorCode: 10, message: "Invalid response from server"});
+                    }
                 })
+                .then(
+                    data=>{
+                        if (data.length){
+                            fulfill(self.mapConditionsResult(data[0]));
+                        }
+                        else{
+                            reject({errorCode: 10, message: "Multiple results, result not accurate enough"});
+                        }
+                    },
+                    err=>{
+                        reject({errorCode: 10, message: "Invalid response from server"});
+                    })
                 .catch(err=> {
                     console.log("fetch error");
                     reject({errorCode: 1, message: "fetch error" }); 
@@ -46,7 +52,8 @@ var service = function(config){
                metric: {value: accuWeatherConditions.Temperature.Metric.Value, unitLabel: "C"},
                imperial: {value: accuWeatherConditions.Temperature.Imperial.Value, unitLabel: "F"}
            },
-           epochTime: accuWeatherConditions.EpochTime
+           epochTime: accuWeatherConditions.EpochTime,
+           iconIndex: accuWeatherConditions.WeatherIcon
         };
 
         return currentConditions;
@@ -81,21 +88,31 @@ var service = function(config){
             fetch(locationSearchUrl + searchPath)
                 .then(function(response) { 
                     if (response.status != 200){
-                        reject({errorCode: response.status, message:"Host error"});
+                        reject({errorCode: response.status, message:"Server error"});
                     }
-	                // Convert to JSON
-	                response.json()
-                        .then(d=>{
-                            //for now, just return the first result found.
-                            if (d.length > 0){
-                                fulfill(d[0].Key);
-                            }
-                            else{
-                                reject({errorCode: 10, message: "Multiple results, result not accurate enough"});
-                            }
-                        })
-                        .catch(err=> reject({errorCode: 2, message:"Error reading result from the server." }) );
+                    if(response.headers.get("content-type") && response.headers.get("content-type").toLowerCase().indexOf("application/json") >= 0){
+	                    // Json response received, convert to JSON object
+ 	                    return response.json();
+                    }
+                    else{
+                        reject({errorCode: 10, message: "Invalid response from server"});
+                    }
                 })
+                .then(
+                    d=>{
+                        //for now, just return the first result found.
+                        if (d.length){
+                            fulfill(d[0].Key);
+                        }
+                        else{
+                            reject({errorCode: 10, message: "Multiple results, result not accurate enough"});
+                        }
+                    },
+                    err=>{
+                         reject({errorCode: 10, message: "Invalid response from server"});
+                    }
+
+                )
                 .catch(err=> reject({errorCode: 1, message: "fetch error" }) )
             });
     }
