@@ -22,7 +22,7 @@ var service = function(config){
  	                    return response.json();
                     }
                     else{
-                        reject({errorCode: 10, message: "Invalid response from server"});
+                        reject({errorCode: 11, message: "Invalid response from server"});
                     }
                 })
                 .then(
@@ -31,15 +31,15 @@ var service = function(config){
                             fulfill(self.mapConditionsResult(data[0],loc));
                         }
                         else{
-                            reject({errorCode: 10, message: "Multiple results, result not accurate enough"});
+                            reject({errorCode: 10, message: "No location found for the specified zipcode"});
                         }
                     },
                     err=>{
-                        reject({errorCode: 10, message: "Invalid response from server"});
+                        reject({errorCode: 11, message: "Invalid response from server"});
                     })
                 .catch(err=> {
-                    console.log("fetch error");
-                    reject({errorCode: 1, message: "fetch error" }); 
+                    
+                    reject({errorCode: 1, message: "Unknown server error" }); 
                 });
         });
     }
@@ -67,7 +67,8 @@ var service = function(config){
 
         return new Promise( (fulfill,reject)=>{
             return this.findLocation(zipCode)
-                .then(loc=>fulfill(this.getCurrentConditionsForLocation(loc)));
+                .then(loc=>fulfill(this.getCurrentConditionsForLocation(loc)),
+                err=>reject(err));
         });
 
     };
@@ -89,14 +90,13 @@ var service = function(config){
                 .then(function(response) { 
                     if (response.status != 200){
                         reject({errorCode: response.status, message:"Unable to reach weather service at this time."});
-                        
                     }
                     if(response.headers.get("content-type") && response.headers.get("content-type").toLowerCase().indexOf("application/json") >= 0){
-	                    // Json response received, convert to JSON object
+                        // Json response received, convert to JSON object
  	                    return response.json();
                     }
                     else{
-                        reject({errorCode: 10, message: "Invalid response from server"});
+                        reject({errorCode: 11, message: "Invalid response from server"});
                     }
                 })
                 .then(
@@ -106,15 +106,16 @@ var service = function(config){
                             fulfill(d[0]);
                         }
                         else{
-                            reject({errorCode: 10, message: "Multiple results, result not accurate enough"});
+                             reject({errorCode: 10, message: "No location found for the specified zipcode"});
                         }
                     },
                     err=>{
                          reject({errorCode: 10, message: "Invalid response from server"});
                     }
+                
 
                 )
-                .catch(err=> reject({errorCode: 1, message: "fetch error" }) )
+                .catch(err=>{ reject({errorCode: 1, message: "unknown server error" })} )
             });
     }
 }
