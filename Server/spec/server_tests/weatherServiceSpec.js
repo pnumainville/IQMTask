@@ -4,22 +4,22 @@ describe("WeatherService",function(){
 
     var config = {
         accuWeatherApiUrl: "http://dataservice.accuweather.com",
-        accuWeatherApiToken : ""
+        accuWeatherApiToken : "dxLeCvLGAqG3IRqKbywnGxAg0pmZejsl"
     }
 
     var service = new weatherService(config);
 
     it('should find a valid location for seattle',function(done){
-        service.findLocationKey("98101").then(d=>{
+        service.findLocation("98101").then(d=>{
             //console.log(d);
-            expect(d).toBe("41332_PC");
+            expect(d.Key).toBe("41332_PC");
             done();
          })
          .catch(e=>fail(e));
     });
 
     it('should return error',function(done){
-        service.findLocationKey("inavlidzipcode").then(d=>{
+        service.findLocation("inavlidzipcode").then(d=>{
             fail('Unwanted branch, zip code was not valid. promise should have thrown error');
             done();
          })
@@ -30,7 +30,7 @@ describe("WeatherService",function(){
     });
 
     it("Should return currentConditions for LocationKey", function(done){
-        service.getCurrentConditionsForLocation("41332_PC")
+        service.getCurrentConditionsForLocation({Key:"41332_PC", LocalizedName: "Seattle"})
             .then(d=>{
                 expect(d.temperature).toBeDefined();
                 expect(d.temperature.metric.unitLabel).toBe("C");

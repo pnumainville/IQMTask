@@ -4,8 +4,8 @@ var fetch = require('node-fetch');
 var service = function(config){
 
    
-    this.getCurrentConditionsForLocation = function(locKey){
-        var conditionsUrl = config.accuWeatherApiUrl + '/currentconditions/v1/' + locKey;
+    this.getCurrentConditionsForLocation = function(loc){
+        var conditionsUrl = config.accuWeatherApiUrl + '/currentconditions/v1/' + loc.Key;
         var searchPath = '?apikey=' + config.accuWeatherApiToken + "&details=true";
         var self = this;
 
@@ -28,7 +28,7 @@ var service = function(config){
                 .then(
                     data=>{
                         if (data.length){
-                            fulfill(self.mapConditionsResult(data[0]));
+                            fulfill(self.mapConditionsResult(data[0],loc));
                         }
                         else{
                             reject({errorCode: 10, message: "Multiple results, result not accurate enough"});
@@ -45,9 +45,9 @@ var service = function(config){
     }
 
 
-    this.mapConditionsResult = function(accuWeatherConditions){
-
+    this.mapConditionsResult = function(accuWeatherConditions,location){
         var currentConditions = {
+           locationName: location.LocalizedName,
            temperature: {
                metric: {value: accuWeatherConditions.Temperature.Metric.Value, unitLabel: "C"},
                imperial: {value: accuWeatherConditions.Temperature.Imperial.Value, unitLabel: "F"}
@@ -66,8 +66,8 @@ var service = function(config){
         var lastError = null;
 
         return new Promise( (fulfill,reject)=>{
-            return this.findLocationKey(zipCode)
-                .then(locKey=>fulfill(this.getCurrentConditionsForLocation(locKey)));
+            return this.findLocation(zipCode)
+                .then(loc=>fulfill(this.getCurrentConditionsForLocation(loc)));
         });
 
     };
@@ -77,7 +77,7 @@ var service = function(config){
     //findLocationKey
     //Query AccuWeather API for the locationKey of  the provided zipCode. 
     //The locationKey will be used for subsequent requests to the accuWeather API for the provided zipCode
-    this.findLocationKey = function(zipCode){
+    this.findLocation = function(zipCode){
 
         var locationSearchUrl = config.accuWeatherApiUrl + '/locations/v1/search';
         var searchPath = '?apikey=' + config.accuWeatherApiToken + "&q=" + zipCode;
@@ -88,7 +88,8 @@ var service = function(config){
             fetch(locationSearchUrl + searchPath)
                 .then(function(response) { 
                     if (response.status != 200){
-                        reject({errorCode: response.status, message:"Server error"});
+                        reject({errorCode: response.status, message:"Unable to reach weather service at this time."});
+                        
                     }
                     if(response.headers.get("content-type") && response.headers.get("content-type").toLowerCase().indexOf("application/json") >= 0){
 	                    // Json response received, convert to JSON object
@@ -102,7 +103,7 @@ var service = function(config){
                     d=>{
                         //for now, just return the first result found.
                         if (d.length){
-                            fulfill(d[0].Key);
+                            fulfill(d[0]);
                         }
                         else{
                             reject({errorCode: 10, message: "Multiple results, result not accurate enough"});
