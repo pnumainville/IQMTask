@@ -1,0 +1,38 @@
+<ion-header>
+  <ion-navbar>
+    <ion-title>
+      Your Weather Today
+    </ion-title>
+  </ion-navbar>
+</ion-header>
+
+<ion-content padding>
+
+  <form (ngSubmit)="getWeather()">
+    <ion-list>
+      <ion-item>
+        <ion-input type="text" placeholder="Where are you today? (Zipcode)" [(ngModel)]="zipCode" name="zipCode"></ion-input>
+      </ion-item>
+      <ion-item>
+        <button type="submit" ion-button>Go!</button>
+      </ion-item>
+      
+    </ion-list>
+  </form>
+  
+    
+   <div class="weatherContainer" *ngIf="showWeatherData()">
+    <h1 class="largeText">{{conditions.metric.value}} &deg;{{conditions.metric.unitLabel}}</h1>
+      <img src="/assets/weatherIcons/{{conditions.resourceFile()}}" width=75 height=45/>
+  
+      <p>
+        <label>{{conditions.epochDateTime}}</label>
+      </p> 
+    </div>
+
+    <p *ngIf="error != null">
+      {{error}}
+    </p>
+   
+  
+</ion-content>
