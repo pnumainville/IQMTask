@@ -3,6 +3,11 @@ var weatherApp = express();
 var weatherService = require('./lib/weatherService');
 var config = require('./config');
 
+weatherApp.use(function(req, res, next) {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  next();
+});
 
 weatherApp.get('/byZip/:zipCode',(req,res)=>{
 
