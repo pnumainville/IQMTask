@@ -17,10 +17,10 @@ weatherApp.get('/byZip/:zipCode',(req,res)=>{
         //fetch weather data using provided zipcode
         var currentWeather = service.getCurrentConditionsForZipCode(req.params.zipCode)
             .then(conditionsResult=>res.json(conditionsResult))
-            .catch(err=>res.sendStatus(404).end("Current conditions were not found for specification location"));
+            .catch(err=>res.sendStatus(404).json(err));
     }
     else{
-        res.status(404).end('Provided zipcode was not valid.');
+        res.status(404).json({errorCode: 1, message:"Invalid zipcode provided."});
     }
 
 
