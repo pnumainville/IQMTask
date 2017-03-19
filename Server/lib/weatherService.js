@@ -9,7 +9,7 @@ var service = function(config){
         var searchPath = '?apikey=' + config.accuWeatherApiToken + "&details=true";
         var self = this;
 
-        return new Promise((fulfill,reject)=>{
+        return new Promise((resolve,reject)=>{
             console.log("fetching " + conditionsUrl + searchPath);
             
             fetch(conditionsUrl + searchPath)
@@ -28,7 +28,7 @@ var service = function(config){
                 .then(
                     data=>{
                         if (data.length){
-                            fulfill(self.mapConditionsResult(data[0],loc));
+                            resolve(self.mapConditionsResult(data[0],loc));
                         }
                         else{
                             reject({errorCode: 10, message: "No location found for the specified zipcode"});
@@ -65,9 +65,9 @@ var service = function(config){
         var locationKey = "";
         var lastError = null;
 
-        return new Promise( (fulfill,reject)=>{
+        return new Promise( (resolve,reject)=>{
             return this.findLocation(zipCode)
-                .then(loc=>fulfill(this.getCurrentConditionsForLocation(loc)),
+                .then(loc=>resolve(this.getCurrentConditionsForLocation(loc)),
                 err=>reject(err));
         });
 
@@ -85,7 +85,7 @@ var service = function(config){
 
         console.log("fetching " + locationSearchUrl + searchPath);
 
-        return new Promise((fulfill,reject)=>{
+        return new Promise((resolve,reject)=>{
             fetch(locationSearchUrl + searchPath)
                 .then(function(response) { 
                     if (response.status != 200){
@@ -103,7 +103,7 @@ var service = function(config){
                     d=>{
                         //for now, just return the first result found.
                         if (d.length){
-                            fulfill(d[0]);
+                            resolve(d[0]);
                         }
                         else{
                              reject({errorCode: 10, message: "No location found for the specified zipcode"});
