@@ -4,7 +4,7 @@ describe("WeatherService",function(){
 
     var config = {
         accuWeatherApiUrl: "http://dataservice.accuweather.com",
-        accuWeatherApiToken : "dxLeCvLGAqG3IRqKbywnGxAg0pmZejsl"
+        accuWeatherApiToken : "<token goes here>"
     }
 
     var service = new weatherService(config);
