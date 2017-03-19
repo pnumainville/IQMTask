@@ -25,6 +25,7 @@ export class WeatherService {
 
     var dateTime = this.convertEpoch(body.epochTime);
     return new CurrentConditions(
+        body.locationName,
         new Temperature(body.temperature.metric.value,body.temperature.metric.unitLabel),
         new Temperature(body.temperature.metric.value,body.temperature.metric.unitLabel),
         dateTime, 
@@ -44,9 +45,14 @@ export class WeatherService {
      console.log("handle error  called");
     let errMsg: string;
     if (error instanceof Response) {
-      //const body = error.json() || '';
-      //const err = body.error || JSON.stringify(body);
-      errMsg = `${error.status} - ${error.statusText || ''}`;
+      const body = error.json() || '';
+      
+      if (body){
+        errMsg = body.message;
+      }
+      else{
+        errMsg = `${error.status} - ${error.statusText || ''} ${body}`;
+      }
     } else {
       errMsg = error.message ? error.message : error.toString();
     }

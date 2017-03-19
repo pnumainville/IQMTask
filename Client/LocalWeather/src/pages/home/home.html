@@ -24,7 +24,7 @@
    <div class="weatherContainer" *ngIf="showWeatherData()">
     <h1 class="largeText">{{conditions.metric.value}} &deg;{{conditions.metric.unitLabel}}</h1>
       <img src="/assets/weatherIcons/{{conditions.resourceFile()}}" width=75 height=45/>
-  
+      <h2>{{conditions.locationName}}</h2>
       <p>
         <label>{{conditions.epochDateTime}}</label>
       </p> 

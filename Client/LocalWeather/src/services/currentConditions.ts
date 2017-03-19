@@ -14,6 +14,7 @@ function zeroPad(num, places) {
 
 export class CurrentConditions {
   constructor(
+    public locationName: string,
     public metric: Temperature,
     public imperial: Temperature,
     public epochDateTime: Date,

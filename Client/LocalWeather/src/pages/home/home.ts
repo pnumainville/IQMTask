@@ -13,7 +13,7 @@ import {CurrentConditions, Temperature} from '../../services/currentConditions';
 export class HomePage {
   error = "";
   zipCode = "";
-  conditions = new CurrentConditions(new Temperature(null,null),new Temperature(null,null),null,null);
+  conditions = null;
   constructor(
     public navCtrl: NavController,
     private weatherService: WeatherService
@@ -28,15 +28,16 @@ export class HomePage {
           this.error = "";
         }, 
         err=>{
+          
           this.error = err;
-          this.conditions = new CurrentConditions(new Temperature(null,null),new Temperature(null,null),null,null);
+          this.conditions = null;
         }
       );
 
   }
 
   showWeatherData(){
-    return this.conditions.metric.value != null; 
+    return this.conditions != null; 
   }
 
 }
