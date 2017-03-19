@@ -24,10 +24,24 @@ describe("WeatherService",function(){
             done();
          })
          .catch(e=>{
+             console.log(e);
             done();
          })
 
     });
+
+     it('should return error, zipcode not found',function(done){
+        service.findLocation("98998").then(d=>{
+            fail('Unwanted branch, zip code was not valid. promise should have thrown error');
+            done();
+         })
+         .catch(e=>{
+              console.log(e);
+            done();
+         })
+
+    });
+
 
     it("Should return currentConditions for LocationKey", function(done){
         service.getCurrentConditionsForLocation({Key:"41332_PC", LocalizedName: "Seattle"})
