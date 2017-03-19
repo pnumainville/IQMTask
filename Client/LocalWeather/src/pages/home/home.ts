@@ -1,9 +1,7 @@
 import { Component } from '@angular/core';
-
 import { NavController } from 'ionic-angular';
-
 import {WeatherService} from '../../services/weather.service';
-import {CurrentConditions, Temperature} from '../../services/currentConditions';
+
 
 @Component({
   selector: 'page-home',
@@ -33,7 +31,6 @@ export class HomePage {
           this.conditions = null;
         }
       );
-
   }
 
   showWeatherData(){
