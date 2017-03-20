@@ -9,6 +9,10 @@ describe("WeatherService",function(){
 
     var service = new weatherService(config);
 
+    it('TOKEN SHOULD BE CONFIGURED', function(){
+        expect(config.accuWeatherApiToken).not.toBe("<token goes here>");
+    });
+
     it('should find a valid location for seattle',function(done){
         service.findLocation("","98101").then(d=>{
             //console.log(d);
