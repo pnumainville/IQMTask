@@ -6,6 +6,12 @@ var searchMethods = {
     zipCode: ""
 }
 
+var errorCodes = {
+    notFound: 10,
+    contentError:  11,
+    localError: 12,
+}
+
 var service = function(config){
 
    
@@ -27,7 +33,7 @@ var service = function(config){
  	                    return response.json();
                     }
                     else{
-                        reject({errorCode: 11, message: "Invalid response from server"});
+                        reject({errorCode: errorCodes.contentError, message: "Invalid response from server"});
                     }
                 })
                 .then(
@@ -36,15 +42,15 @@ var service = function(config){
                             resolve(self.mapConditionsResult(data[0],loc));
                         }
                         else{
-                            reject({errorCode: 10, message: "No location found for the specified zipcode"});
+                            reject({errorCode: errorCodes.notFound, message: "No location found for the specified zipcode"});
                         }
                     },
                     err=>{
-                        reject({errorCode: 11, message: "Invalid response from server"});
+                        reject({errorCode: errorCodes.contentError, message: "Invalid response from server"});
                     })
                 .catch(err=> {
                     
-                    reject({errorCode: 1, message: "Unknown server error" }); 
+                    reject({errorCode: errorCodes.localError, message: "Unknown server error" }); 
                 });
         });
     }
@@ -120,7 +126,7 @@ var service = function(config){
  	                    return response.json();
                     }
                     else{
-                        reject({errorCode: 11, message: "Invalid response from server"});
+                        reject({errorCode: errorCodes.contentError, message: "Invalid response from server"});
                     }
                 })
                 .then(
@@ -131,7 +137,7 @@ var service = function(config){
                                 resolve(d[0]);
                             }
                             else{ 
-                                reject({errorCode: 10, message: "No location found for the specified request"});
+                                reject({errorCode: errorCodes.notFound, message: "No location found for the specified request"});
                             }
                         }
                         //Check for null object as well, accuweather  api will return null when geolocation is not found.
@@ -139,15 +145,15 @@ var service = function(config){
                             resolve(d);
                         }
                         else{
-                            reject({errorCode: 10, message: "No location found for the specified request"});
+                            reject({errorCode: errorCodes.notFound, message: "No location found for the specified request"});
                         }
                         
                     },
                     err=>{
-                         reject({errorCode: 10, message: "Invalid response from server"});
+                         reject({errorCode: errorCodes.contentError, message: "Invalid response from server"});
                     }
                 )
-                .catch(err=>{  reject({errorCode: 1, message: "unknown server error" })} )
+                .catch(err=>{  reject({errorCode: errorCodes.localError, message: "unknown server error" })} )
             });
     }
 
