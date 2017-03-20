@@ -22,7 +22,9 @@
       
     </ion-list>
   </form>
-  
+  <div *ngIf="isLoading()" style="text-align:center;">
+    <ion-spinner></ion-spinner>
+  </div>
     
    <div class="weatherContainer" *ngIf="showWeatherData()">
     <h1 class="largeText">{{conditions.metric.value}} &deg;{{conditions.metric.unitLabel}}</h1>
