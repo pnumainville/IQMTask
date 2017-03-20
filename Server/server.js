@@ -30,7 +30,35 @@ weatherApp.get('/byZip/:zipCode',(req,res)=>{
 
 });
 
+weatherApp.get('/byGeoLocation/:longitude/:latitude',(req,res)=>{
 
+    var service = new weatherService(config);
+
+    var lat = parseFloat(req.params.latitude);
+    var lng = parseFloat(req.params.longitude);
+
+    if (isValidLatLng(lat,lng)){
+        //fetch weather data using provided latitude, longitude
+        var currentWeather = service.getCurrentConditionsForLatLng(lat,lng)
+            .then(
+                conditionsResult=>res.json(conditionsResult),
+                err=>res.status(404).json(err)
+            )
+            .catch(err=>res.status(404).json(err));
+    }
+    else{
+        res.status(404).json({errorCode: 1, message:"Invalid latitude,longitude provided."});
+    }
+
+
+});
+
+
+function isValidLatLng(lat,lng){
+    if (typeof lat === 'number' && typeof lng === 'number')
+        return lat > -90 && lat < 90 && lng > -180 && lng < 180;
+    return false;
+}
 
 function isValidUSZip(zipCode) {
    return /^\d{5}(-\d{4})?$/.test(zipCode);

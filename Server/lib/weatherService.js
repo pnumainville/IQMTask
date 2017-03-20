@@ -1,6 +1,11 @@
 
 var fetch = require('node-fetch');
 
+var searchMethods = {
+    geolocation: "/cities/geoposition",
+    zipCode: ""
+}
+
 var service = function(config){
 
    
@@ -66,28 +71,47 @@ var service = function(config){
         var lastError = null;
 
         return new Promise( (resolve,reject)=>{
-            return this.findLocation(zipCode)
-                .then(loc=>resolve(this.getCurrentConditionsForLocation(loc)),
-                err=>reject(err));
+            return this.findLocation(searchMethods.zipCode,zipCode)
+                .then(
+                    loc=>resolve(this.getCurrentConditionsForLocation(loc)),
+                    err=>reject(err)
+                );
+        });
+
+    };
+
+    this.getCurrentConditionsForLatLng = function(lat,lng){
+
+        var locationKey = "";
+        var lastError = null;
+
+        return new Promise( (resolve,reject)=>{
+            return this.findLocation(searchMethods.geolocation, [lat,lng].join(","))
+                .then(
+                    loc=>resolve(this.getCurrentConditionsForLocation(loc)),
+                    err=>reject(err)
+                );
         });
 
     };
 
 
 
-    //findLocationKey
-    //Query AccuWeather API for the locationKey of  the provided zipCode. 
-    //The locationKey will be used for subsequent requests to the accuWeather API for the provided zipCode
-    this.findLocation = function(zipCode){
-
-        var locationSearchUrl = config.accuWeatherApiUrl + '/locations/v1/search';
-        var searchPath = '?apikey=' + config.accuWeatherApiToken + "&q=" + zipCode;
+    //findLocation
+    //Query AccuWeather API for the locationKey of the provided query. 
+    //The locationKey will be used for subsequent requests to the accuWeather API for the provided location information 
+    //[method = searchMethods, query = (lat,lng) or zipCode]
+    this.findLocation = function(method,query){
+        
+        var locationSearchUrl = config.accuWeatherApiUrl + '/locations/v1' + method + "/search";
+        var searchPath = '?apikey=' + config.accuWeatherApiToken + "&q=" + query;
 
         console.log("fetching " + locationSearchUrl + searchPath);
 
         return new Promise((resolve,reject)=>{
             fetch(locationSearchUrl + searchPath)
                 .then(function(response) { 
+                   
                     if (response.status != 200){
                         reject({errorCode: response.status, message:"Unable to reach weather service at this time."});
                     }
@@ -102,22 +126,32 @@ var service = function(config){
                 .then(
                     d=>{
                         //for now, just return the first result found.
-                        if (d.length){
-                            resolve(d[0]);
+                        if (Array.isArray(d)){
+                            if (d.length){
+                                resolve(d[0]);
+                            }
+                            else{ 
+                                reject({errorCode: 10, message: "No location found for the specified request"});
+                            }
+                        }
+                        //Check for null object as well, accuweather  api will return null when geolocation is not found.
+                        else if (typeof d === "object" && d != null){
+                            resolve(d);
                         }
                         else{
-                             reject({errorCode: 10, message: "No location found for the specified zipcode"});
+                            reject({errorCode: 10, message: "No location found for the specified request"});
                         }
+                        
                     },
                     err=>{
                          reject({errorCode: 10, message: "Invalid response from server"});
                     }
-                
-
                 )
-                .catch(err=>{ reject({errorCode: 1, message: "unknown server error" })} )
+                .catch(err=>{  reject({errorCode: 1, message: "unknown server error" })} )
             });
     }
+
+    
 }
 
 module.exports = service;

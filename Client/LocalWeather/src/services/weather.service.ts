@@ -9,13 +9,18 @@ import 'rxjs/add/operator/map';
 
 @Injectable()
 export class WeatherService {
-  private weatherUrl = 'http://localhost:3000/byZip/';  // URL to web API
+  private weatherUrl = 'http://localhost:3000/';  // URL to web API
   constructor (private http: Http) {
 
       this.extractData = this.extractData.bind(this);
   }
-    getCurrentConditions(zipCode): Observable<CurrentConditions> {
-        return this.http.get(this.weatherUrl + zipCode)
+  getCurrentConditions(zipCode): Observable<CurrentConditions> {
+        return this.http.get(this.weatherUrl + "byZip/"+ zipCode)
+                    .map(this.extractData)
+                    .catch(this.handleError);
+  }
+  getCurrentConditionsByLatLng(latitude:number,longitude:number): Observable<CurrentConditions> {
+        return this.http.get(this.weatherUrl + "byGeoLocation/" + longitude + "/" + latitude)
                     .map(this.extractData)
                     .catch(this.handleError);
   }
