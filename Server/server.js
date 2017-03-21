@@ -14,7 +14,7 @@ weatherApp.get('/byZip/:zipCode',(req,res)=>{
 
     var service = new weatherService(config);
 
-    if (isValidUSZip(req.params.zipCode)){
+    if (isValidUSZip(req.params.zipCode) || isValidCAPostalCode(req.params.zipCode)){
         //fetch weather data using provided zipcode
         var currentWeather = service.getCurrentConditionsForZipCode(req.params.zipCode)
             .then(
@@ -58,6 +58,11 @@ function isValidLatLng(lat,lng){
     if (typeof lat === 'number' && typeof lng === 'number')
         return lat > -90 && lat < 90 && lng > -180 && lng < 180;
     return false;
+}
+
+
+function isValidCAPostalCode(postalCode){
+    return /^[ABCEGHJKLMNPRSTVXY]\d[ABCEGHJKLMNPRSTVWXYZ]( )?\d[ABCEGHJKLMNPRSTVWXYZ]\d$/i.test(postalCode);
 }
 
 function isValidUSZip(zipCode) {
